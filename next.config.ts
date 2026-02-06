@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
+// @ts-ignore
+import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
-  // Run ESLint separately via `npm run lint` (avoids deprecated next lint)
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Stub optional peer deps from @standard-community/standard-json
+
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -17,4 +18,23 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA({
+  ...nextConfig,
+
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }: { request: Request }) =>
+        request.mode === "navigate",
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages",
+      },
+    },
+  ],
+
+  disable: process.env.NODE_ENV === "development",
+});
