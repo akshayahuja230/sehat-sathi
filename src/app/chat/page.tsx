@@ -134,6 +134,7 @@ export default function ChatPage() {
                 <InteractableMedicationInstructions
                   id="med-instructions"
                   medicationName="Medication"
+                  language="en"
                   dose={{ amount: 1, unit: "tablet" }}
                   schedule={{
                     morning: false,

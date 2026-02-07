@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 export const referralLetterSchema = z.object({
+  id: z.string().optional(),
   patient: z.object({
     fullName: z.string().default(""),
     dob: z.string().optional().default(""),
