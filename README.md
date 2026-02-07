@@ -1,131 +1,159 @@
-# Tambo Template
+# 🏥 Healthcare Triage Assistant for Underserved Communities
 
-This is a starter NextJS app with Tambo hooked up to get your AI app development started quickly.
+An **AI-powered, offline-capable healthcare triage system** designed for underserved and rural communities.
 
-## Get Started
+---
 
-1. Run `npm create-tambo@latest my-tambo-app` for a new project
+## 🌍 Problem
+Over **2B+ people** lack access to quality healthcare.
+Rural and remote areas urgently need intelligent, accessible triage tools to reduce delayed care and preventable deaths.
 
-2. `npm install`
+---
 
-3. `npx tambo init`
+## 💡 Solution
+An offline-first Progressive Web App (PWA) that delivers:
 
-- or rename `example.env.local` to `.env.local` and add your tambo API key you can get for free [here](https://tambo.co/dashboard).
+**Intelligent symptom triage**
 
-4. Run `npm run dev` and go to `localhost:3000` to use the app!
+**Visual, low-literacy medication guidance**
 
-## Customizing
+**Automated doctor referral letters**
 
-### Change what components tambo can control
+**Community-level health insights**
 
-You can see how components are registered with tambo in `src/lib/tambo.ts`:
+---
 
-```tsx
-export const components: TamboComponent[] = [
-  {
-    name: "Graph",
-    description:
-      "A component that renders various types of charts (bar, line, pie) using Recharts. Supports customizable data visualization with labels, datasets, and styling options.",
-    component: Graph,
-    propsSchema: graphSchema,
-  },
-  // Add more components here
-];
-```
+## ✨ Features
 
-You can install the graph component into any project with:
+### 1. Multi-language Symptom Input + Body Diagrams
+- Local-language symptom entry  
+- Interactive visual body selection 
+- Reduces literacy and language barriers 
 
+### 2. Intelligent Triage Engine
+- Classifies cases into:
+  - **Emergency** 
+  - **Urgent** 
+  - **Routine**  
+- Rule-based decision trees for safe escalation
+
+### 3. Medication Instructions (Auto-generated)
+- Generated from triage outcome  
+- Simple dosage & timing instructions  
+- Visual-first, low-literacy friendly  
+
+### 4. Referral Letter Generation
+- Auto-generated from triage data 
+- Includes:
+  - **Symptoms** 
+  - **Assessment** 
+  - **Urgency Level**
+- Doctor-ready clinical format (copy & share)  
+
+### 5. Community Health Dashboard
+- Aggregated & anonymized insights  
+- Tracks symptoms, urgency levels, trends  
+
+### 6. Offline-First PWA
+- Works without internet  
+- Local data storage  
+- Auto-sync when online  
+
+---
+
+## 📸 Screenshots
+
+### Triage Flow
+![Triage](screenshots/screenshot_1.png)
+### Referral Form
+![Body Selection](screenshots/screenshot_2.png)
+
+### Referral Letters
+![Referral Form](screenshots/screenshot_3.png)
+### Medications Instructions
+![Generated Referral](screenshots/screenshot_4.png)
+
+### Chat & Workflow
+![Medication](screenshots/screenshot_5.png)
+
+### Community Dashboard
+![Chat](screenshots/screenshot_6.png)
+
+## 🚀 Getting Started (Local Setup)
+
+### 1️⃣ Clone the Repository
 ```bash
-npx tambo add graph
+git clone https://github.com/your-username/sehat-sathi.git
+cd sehat-sathi
 ```
 
-The example Graph component demonstrates several key features:
+---
 
-- Different prop types (strings, arrays, enums, nested objects)
-- Multiple chart types (bar, line, pie)
-- Customizable styling (variants, sizes)
-- Optional configurations (title, legend, colors)
-- Data visualization capabilities
-
-Update the `components` array with any component(s) you want tambo to be able to use in a response!
-
-You can find more information about the options [here](https://docs.tambo.co/concepts/generative-interfaces/generative-components)
-
-### Add tools for tambo to use
-
-Tools are defined with `inputSchema` and `outputSchema`:
-
-```tsx
-export const tools: TamboTool[] = [
-  {
-    name: "globalPopulation",
-    description:
-      "A tool to get global population trends with optional year range filtering",
-    tool: getGlobalPopulationTrend,
-    inputSchema: z.object({
-      startYear: z.number().optional(),
-      endYear: z.number().optional(),
-    }),
-    outputSchema: z.array(
-      z.object({
-        year: z.number(),
-        population: z.number(),
-        growthRate: z.number(),
-      }),
-    ),
-  },
-];
+### 2️⃣ Install Dependencies
+```bash
+npm install
 ```
 
-Find more information about tools [here.](https://docs.tambo.co/concepts/tools)
+---
 
-### The Magic of Tambo Requires the TamboProvider
+### 3️⃣ Configure Tambo API Key
 
-Make sure in the TamboProvider wrapped around your app:
+This project uses **Tambo AI** for triage reasoning and clinical text generation.
 
-```tsx
-...
-<TamboProvider
-  apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-  components={components} // Array of components to control
-  tools={tools} // Array of tools it can use
->
-  {children}
-</TamboProvider>
+Create a `.env` file in the project root:
+
+```env
+NEXT_PUBLIC_TAMBO_API_KEY=your_tambo_api_key_here
 ```
 
-In this example we do this in the `Layout.tsx` file, but you can do it anywhere in your app that is a client component.
+#### ⚠️ Important
+- **Do NOT** commit `.env` files to GitHub  
+- Ensure the API key is available in your deployment environment  
 
-### Voice input
+---
 
-The template includes a `DictationButton` component using the `useTamboVoice` hook for speech-to-text input.
-
-### MCP (Model Context Protocol)
-
-The template includes MCP support for connecting to external tools and resources. You can use the MCP hooks from `@tambo-ai/react/mcp`:
-
-- `useTamboMcpPromptList` - List available prompts from MCP servers
-- `useTamboMcpPrompt` - Get a specific prompt
-- `useTamboMcpResourceList` - List available resources
-
-See `src/components/tambo/mcp-components.tsx` for example usage.
-
-### Change where component responses are shown
-
-The components used by tambo are shown alongside the message response from tambo within the chat thread, but you can have the result components show wherever you like by accessing the latest thread message's `renderedComponent` field:
-
-```tsx
-const { thread } = useTambo();
-const latestComponent =
-  thread?.messages[thread.messages.length - 1]?.renderedComponent;
-
-return (
-  <div>
-    {latestComponent && (
-      <div className="my-custom-wrapper">{latestComponent}</div>
-    )}
-  </div>
-);
+### 4️⃣ Start Development Server
+```bash
+npm run dev
 ```
 
-For more detailed documentation, visit [Tambo's official docs](https://docs.tambo.co).
+The app will be available at:
+```
+http://localhost:3000
+```
+
+*(or the port shown in your terminal)*
+
+---
+
+### 5️⃣ Build for Production
+```bash
+npm run build
+```
+
+---
+
+### 6️⃣ PWA & Offline Mode
+- App automatically caches assets after first load  
+- Works offline using Service Workers  
+- Data is stored locally and synced when online  
+
+
+
+---
+
+## 🌍 Impact
+- Reduces delayed care deaths  
+- Supports community health workers  
+- Lowers system burden  
+
+---
+
+## 💰 Monetization
+- NGOs & Government programs  
+- Micro-subscriptions for clinics  
+
+---
+
+## ⚠️ Disclaimer
+Decision-support only. Not a replacement for professional medical advice.
