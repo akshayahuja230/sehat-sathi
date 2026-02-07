@@ -188,9 +188,15 @@ export function ChatWithTriage({
 
                     // ✅ Here is the triage object we send to your API.
                     // You can later improve it by parsing JSON if your triage output is JSON.
-                    const triage = {
-                      raw: latestTriageText,
-                    };
+                    let triage: any = { raw: latestTriageText };
+                    try {
+                      // If the triage text is JSON, parse it so symptoms/bodyAreas/duration are available
+                      const parsed = JSON.parse(latestTriageText);
+                      // Only accept it if it's an object
+                      if (parsed && typeof parsed === "object") triage = parsed;
+                    } catch {
+                      // Not JSON (plain text). Keep { raw } fallback.
+                    }
 
                     await onGenerateReferral({
                       triage,

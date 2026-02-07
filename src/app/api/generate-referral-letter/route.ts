@@ -1,10 +1,41 @@
 import { NextResponse } from "next/server";
 
+function asStringArray(v: any): string[] {
+  if (!v) return [];
+  if (Array.isArray(v)) return v.map((x) => String(x)).filter(Boolean);
+  return [];
+}
+
 export async function POST(req: Request) {
-  const { triage, toSpecialty, urgency, clinicOrDoctor, reason } = await req.json();
+  const { triage, toSpecialty, urgency, clinicOrDoctor, reason } =
+    await req.json();
+
+  const triageObj = triage && typeof triage === "object" ? triage : {};
+  const raw = typeof triageObj.raw === "string" ? triageObj.raw : "";
+
+  // ✅ Try multiple field names (in case your triage JSON uses different keys)
+  const symptoms: string[] = asStringArray(
+    triageObj.symptoms ?? triageObj.selectedSymptoms
+  );
+
+  const bodyAreas: string[] = asStringArray(
+    triageObj.bodyAreas ?? triageObj.selectedBodyAreas
+  );
+
+  const dangerSigns: string[] = asStringArray(
+    triageObj.dangerSigns ?? triageObj.redFlags
+  );
+
+  const durationDays: number | null =
+    typeof triageObj.durationDays === "number"
+      ? triageObj.durationDays
+      : typeof triageObj.duration === "number"
+        ? triageObj.duration
+        : typeof triageObj.days === "number"
+          ? triageObj.days
+          : null;
 
   // 1) Safety: if triage shows emergency danger signs, force urgency
-  const dangerSigns: string[] = triage?.dangerSigns || [];
   const emergencyLike = dangerSigns.some((x) =>
     ["trouble breathing", "severe bleeding", "fainting", "chest pain"].includes(
       String(x).toLowerCase()
@@ -14,12 +45,6 @@ export async function POST(req: Request) {
   const finalUrgency: "routine" | "urgent" | "stat" =
     emergencyLike ? "stat" : urgency;
 
-  // 2) TODO: call LLM here with a fixed internal prompt (no user prompt)
-  // For now, return a deterministic example built from triage:
-  const symptoms = triage?.symptoms || [];
-  const bodyAreas = triage?.bodyAreas || [];
-  const durationDays = triage?.durationDays;
-
   const reasonText =
     reason ||
     `Evaluation of ${symptoms.join(", ") || "symptoms"}${
@@ -27,6 +52,14 @@ export async function POST(req: Request) {
     }`;
 
   const toClinic = clinicOrDoctor || "";
+
+  // ✅ If structured fields are empty, still include the raw triage text so your letter isn't blank
+  const rawFallbackLine =
+    !symptoms.length && !bodyAreas.length && !durationDays && !dangerSigns.length && raw
+      ? `- Triage summary: ${raw.replace(/\s+/g, " ").trim().slice(0, 600)}${
+          raw.length > 600 ? "..." : ""
+        }`
+      : "";
 
   const letterMarkdown = `**To:** ${toSpecialty}${toClinic ? `, ${toClinic}` : ""}
 
@@ -42,11 +75,12 @@ I am referring this patient for evaluation of **${reasonText}**.
 - Body areas: ${bodyAreas.length ? bodyAreas.join(", ") : "—"}
 - Duration: ${durationDays ? `${durationDays} days` : "—"}
 - Danger signs: ${dangerSigns.length ? dangerSigns.join(", ") : "None reported"}
+${rawFallbackLine}
 
 **Request**
 - Please assess and advise further investigations and management.
 
-Thank you,
+Thank you,  
 [Clinician/Health Worker Name]
 `;
 
@@ -64,8 +98,11 @@ Thank you,
     history: [
       symptoms.length ? `Symptoms: ${symptoms.join(", ")}` : "Symptoms: —",
       durationDays ? `Duration: ${durationDays} days` : "Duration: —",
-      dangerSigns.length ? `Danger signs: ${dangerSigns.join(", ")}` : "Danger signs: none reported",
-    ],
+      dangerSigns.length
+        ? `Danger signs: ${dangerSigns.join(", ")}`
+        : "Danger signs: none reported",
+      raw ? `Triage raw: ${raw.replace(/\s+/g, " ").trim().slice(0, 300)}${raw.length > 300 ? "..." : ""}` : "",
+    ].filter(Boolean),
     relevantPMH: [],
     meds: [],
     allergies: [],
