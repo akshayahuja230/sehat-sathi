@@ -157,7 +157,9 @@ export default function ChatPage() {
               </div>
 
               <div className="p-4 max-h-[calc(100dvh-180px)] overflow-auto">
-                <InteractableReferralLetter id="referral-letter" {...referralProps} />
+                <div id="referral-letter-print">
+                  <InteractableReferralLetter id="referral-letter" {...referralProps} />
+                </div>
               </div>
             </section>
           </div>
