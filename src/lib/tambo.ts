@@ -17,7 +17,10 @@ import {
 import type { TamboComponent } from "@tambo-ai/react";
 import { TamboTool } from "@tambo-ai/react";
 import { z } from "zod";
-
+import { MedicationInstructions, medicationInstructionsSchema } from "@/components/medications/MedicationInstructions";
+import { InteractableMedicationInstructions } from "@/components/medications/InteractableMedicationInstructions";
+import { InteractableReferralLetter } from "@/components/referrals/InteractableReferralLetter";
+import { referralLetterSchema } from "@/components/referrals/ReferralLetter";
 /**
  * tools
  *
@@ -97,6 +100,18 @@ export const components: TamboComponent[] = [
       "A component that displays options as clickable cards with links and summaries with the ability to select multiple items.",
     component: DataCard,
     propsSchema: dataCardSchema,
+  },
+  {
+    name: "MedicationInstructions",          // MUST be this
+    description: "Persistent medication instructions card",
+    component: InteractableMedicationInstructions, // wrapper goes here
+    propsSchema: medicationInstructionsSchema,
+  },
+  {
+    name: "ReferralLetter",
+    description: "Persistent referral letter card",
+    component: InteractableReferralLetter,
+    propsSchema: referralLetterSchema,
   },
   // Add more components here
 ];
