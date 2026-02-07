@@ -12,7 +12,7 @@ export type BodyArea =
   | "none";
 
 export type SymptomInput = {
-  language: "en" | "hi" | "sw";
+  language: "en" | "hi" | "mr" | "gu";
   symptomText: string;
   bodyArea: BodyArea;
 };

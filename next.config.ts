@@ -1,6 +1,22 @@
 import type { NextConfig } from "next";
-// @ts-ignore
-import withPWA from "next-pwa";
+import nextPWA from "next-pwa";
+
+const withPWA = nextPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }: { request: Request }) => request.mode === "navigate",
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages",
+      },
+    },
+  ],
+});
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -18,23 +34,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA({
-  ...nextConfig,
-
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-
-  runtimeCaching: [
-    {
-      urlPattern: ({ request }: { request: Request }) =>
-        request.mode === "navigate",
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "pages",
-      },
-    },
-  ],
-
-  disable: process.env.NODE_ENV === "development",
-});
+export default withPWA(nextConfig);
