@@ -14,7 +14,7 @@ export function ChatWithTriage() {
         <TriagePanel
           onSendToChat={async (text) => {
             // Fill the chat input with the triage summary
-            setValue(text);
+            setValue(`Based on this triage JSON, update MedicationInstructions id med-instructions : ${text}`);
 
             // Optional: auto-send immediately
             // Comment this out if you want the user to review/edit before sending.

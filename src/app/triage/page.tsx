@@ -94,7 +94,6 @@ export default function TriagePage() {
           )}
         </div>
       </div>
-
       <div className="mt-6 text-xs text-slate-500">
         Note: This is a prototype triage flow. Add real clinical rules + local safety content before field use.
       </div>
