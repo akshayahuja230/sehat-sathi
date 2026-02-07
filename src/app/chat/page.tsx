@@ -1,22 +1,148 @@
 "use client";
 
-import { useMcpServers } from "@/components/tambo/mcp-config-modal";
-import { components, tools } from "@/lib/tambo";
-import { TamboProvider } from "@tambo-ai/react";
-import { ChatWithTriage } from "./chat-with-triage";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function Home() {
-  const mcpServers = useMcpServers();
+import {
+  MessageInput,
+  MessageInputSubmitButton,
+  MessageInputTextarea,
+  MessageInputToolbar,
+} from "@/components/tambo/message-input";
+import { ScrollableMessageContainer } from "@/components/tambo/scrollable-message-container";
+import { ThreadContent, ThreadContentMessages } from "@/components/tambo/thread-content";
+
+import { ChatWithTriage } from "./chat-with-triage";
+import { InteractableMedicationInstructions } from "@/components/medications/InteractableMedicationInstructions";
+import { InteractableReferralLetter } from "@/components/referrals/InteractableReferralLetter";
+
+export default function ChatPage() {
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   return (
-    <TamboProvider
-      apiKey={process.env.NEXT_PUBLIC_TAMBO_API_KEY!}
-      components={components}
-      tools={tools}
-      tamboUrl={process.env.NEXT_PUBLIC_TAMBO_URL}
-      mcpServers={mcpServers}
-    >
-      <ChatWithTriage />
-    </TamboProvider>
+    <div className="h-dvh w-full bg-gray-50 flex overflow-hidden">
+      {/* Chat Sidebar */}
+      <aside
+        className={[
+          "relative bg-white border-r border-gray-200 flex flex-col transition-all duration-300",
+          isChatOpen ? "w-[360px]" : "w-0",
+        ].join(" ")}
+      >
+        {/* Sidebar content (only render when open so it doesn't squeeze layout) */}
+        {isChatOpen && (
+          <>
+            <div className="shrink-0 p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Chat Assistant
+              </h2>
+            </div>
+
+            <ScrollableMessageContainer className="flex-1 min-h-0 p-4">
+              <ThreadContent variant="default">
+                <ThreadContentMessages />
+              </ThreadContent>
+            </ScrollableMessageContainer>
+
+            <div className="shrink-0 p-4 border-t border-gray-200">
+              <MessageInput variant="bordered">
+                <MessageInputTextarea placeholder="Ask for instructions or a referral letter..." />
+                <MessageInputToolbar>
+                  <MessageInputSubmitButton />
+                </MessageInputToolbar>
+              </MessageInput>
+            </div>
+          </>
+        )}
+
+        {/* Collapse/Expand button */}
+        <button
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className="absolute -right-10 top-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-r-lg p-2 hover:bg-gray-50 shadow-sm"
+          aria-label={isChatOpen ? "Close chat" : "Open chat"}
+        >
+          {isChatOpen ? (
+            <ChevronLeft className="w-4 h-4" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
+        </button>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 min-w-0 overflow-auto">
+        <div className="p-6">
+          {/* Two-panel layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* Left: Triage */}
+            <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-base font-semibold text-gray-900">Triage</h2>
+                <p className="text-sm text-gray-500">
+                  Fill the form and send results to chat.
+                </p>
+              </div>
+              <div className="p-4 max-h-[calc(100dvh-180px)] overflow-auto">
+                <ChatWithTriage />
+              </div>
+            </section>
+
+            {/* Right: Medication Instructions (persistent block) */}
+            <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-base font-semibold text-gray-900">
+                  Medication Instructions
+                </h2>
+              </div>
+
+              {/* Give it a max height + scroll so it doesn't get weirdly tall */}
+              <div className="p-4 max-h-[calc(100dvh-180px)] overflow-auto">
+                <InteractableMedicationInstructions
+                  id="med-instructions"
+                  medicationName="Medication"
+                  dose={{ amount: 1, unit: "tablet" }}
+                  schedule={{
+                    morning: false,
+                    noon: false,
+                    evening: false,
+                    bedtime: false,
+                  }}
+                  warnings={[]}
+                  notesSimple={[]}
+                />
+              </div>
+            </section>
+
+
+            <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-base font-semibold text-gray-900">
+                  Referral Letter
+                </h2>
+              </div>
+
+              {/* Give it a max height + scroll so it doesn't get weirdly tall */}
+              <div className="p-4 max-h-[calc(100dvh-180px)] overflow-auto">
+                <InteractableReferralLetter
+                      id="referral-letter"
+                      patient={{ fullName: "", dob: "", mrn: "", phone: "" }}
+                      to={{ clinicianName: "", clinic: "", specialty: "", fax: "" }}
+                      from={{ clinicianName: "", clinic: "", phone: "" }}
+                      reasonForReferral=""
+                      urgency="routine"
+                      history={[]}
+                      relevantPMH={[]}
+                      meds={[]}
+                      allergies={[]}
+                      examFindings={[]}
+                      assessment={[]}
+                      requestedWorkup={[]}
+                      letterMarkdown=""
+                    />
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
