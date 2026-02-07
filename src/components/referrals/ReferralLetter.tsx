@@ -106,7 +106,30 @@ export function ReferralLetter(props: ReferralLetterProps) {
             </pre>
           </div>
           <div className="text-xs text-gray-500 mt-2">
-            Tip: Copy/paste this into your EMR or email/fax workflow.
+            <button
+              type="button"
+              className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+              onClick={() => navigator.clipboard.writeText(letterMarkdown || "")}
+            >
+              Copy
+            </button>
+
+            <a
+              className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50 inline-block"
+              href={`https://wa.me/?text=${encodeURIComponent(letterMarkdown || "")}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Share WhatsApp
+            </a>
+
+            <button
+              type="button"
+              className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+              onClick={() => window.print()}
+            >
+              Download PDF
+            </button>
           </div>
         </div>
       </div>

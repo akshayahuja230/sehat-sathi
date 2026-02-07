@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
+import { InteractableReferralLetter } from "@/components/referrals/InteractableReferralLetter";
 import {
   MessageInput,
   MessageInputSubmitButton,
@@ -14,11 +14,46 @@ import { ThreadContent, ThreadContentMessages } from "@/components/tambo/thread-
 
 import { ChatWithTriage } from "./chat-with-triage";
 import { InteractableMedicationInstructions } from "@/components/medications/InteractableMedicationInstructions";
-import { InteractableReferralLetter } from "@/components/referrals/InteractableReferralLetter";
 
 export default function ChatPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
+  const [referralProps, setReferralProps] = useState({
+    patient: { fullName: "", dob: "", mrn: "", phone: "" },
+    to: { clinicianName: "", clinic: "", specialty: "", fax: "" },
+    from: { clinicianName: "", clinic: "", phone: "" },
+    reasonForReferral: "",
+    urgency: "routine" as "routine" | "urgent" | "stat",
+    history: [] as string[],
+    relevantPMH: [] as string[],
+    meds: [] as string[],
+    allergies: [] as string[],
+    examFindings: [] as string[],
+    assessment: [] as string[],
+    requestedWorkup: [] as string[],
+    letterMarkdown: "",
+  });
 
+  async function generateReferralFromTriage(input: {
+    triage: any; // you’ll pass your triage state here
+    toSpecialty: string;
+    urgency: "routine" | "urgent" | "stat";
+    clinicOrDoctor?: string;
+    reason?: string;
+  }) {
+    const res = await fetch("/api/generate-referral-letter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to generate referral letter");
+    }
+
+    const next = await res.json();
+    setReferralProps(next); // updates right-side card
+  }
   return (
     <div className="h-dvh w-full bg-gray-50 flex overflow-hidden">
       {/* Chat Sidebar */}
@@ -82,7 +117,7 @@ export default function ChatPage() {
                 </p>
               </div>
               <div className="p-4 max-h-[calc(100dvh-180px)] overflow-auto">
-                <ChatWithTriage />
+                <ChatWithTriage onGenerateReferral={generateReferralFromTriage} />
               </div>
             </section>
 
@@ -113,31 +148,16 @@ export default function ChatPage() {
             </section>
 
 
-            <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+           <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <div className="p-4 border-b border-gray-200">
-                <h2 className="text-base font-semibold text-gray-900">
-                  Referral Letter
-                </h2>
+                <h2 className="text-base font-semibold text-gray-900">Referral Letter</h2>
+                <p className="text-sm text-gray-500">
+                  Generated from triage (no prompt needed).
+                </p>
               </div>
 
-              {/* Give it a max height + scroll so it doesn't get weirdly tall */}
               <div className="p-4 max-h-[calc(100dvh-180px)] overflow-auto">
-                <InteractableReferralLetter
-                      id="referral-letter"
-                      patient={{ fullName: "", dob: "", mrn: "", phone: "" }}
-                      to={{ clinicianName: "", clinic: "", specialty: "", fax: "" }}
-                      from={{ clinicianName: "", clinic: "", phone: "" }}
-                      reasonForReferral=""
-                      urgency="routine"
-                      history={[]}
-                      relevantPMH={[]}
-                      meds={[]}
-                      allergies={[]}
-                      examFindings={[]}
-                      assessment={[]}
-                      requestedWorkup={[]}
-                      letterMarkdown=""
-                    />
+                <InteractableReferralLetter id="referral-letter" {...referralProps} />
               </div>
             </section>
           </div>
