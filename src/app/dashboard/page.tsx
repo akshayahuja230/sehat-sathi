@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { loadOutcomes } from "@/lib/community-store";
 import { useEffect, useMemo, useState } from "react";
 
@@ -14,17 +15,11 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => {
     const total = events.length;
+    const emergency = events.filter((e) => e.outcome === "emergency").length;
+    const urgent = events.filter((e) => e.outcome === "urgent").length;
 
-    const emergency = events.filter(e => e.outcome === "emergency").length;
-    const urgent = events.filter(e => e.outcome === "urgent").length;
-
-    const last24h = events.filter(
-      e => now - e.timestamp < 24 * 60 * 60 * 1000
-    ).length;
-
-    const last7d = events.filter(
-      e => now - e.timestamp < 7 * 24 * 60 * 60 * 1000
-    ).length;
+    const last24h = events.filter((e) => now - e.timestamp < 24 * 60 * 60 * 1000).length;
+    const last7d = events.filter((e) => now - e.timestamp < 7 * 24 * 60 * 60 * 1000).length;
 
     return {
       total,
@@ -37,24 +32,15 @@ export default function DashboardPage() {
     };
   }, [events, now]);
 
-  const symptoms = useMemo(
-    () => countBy(events.flatMap(e => e.symptoms)),
-    [events]
-  );
+  const symptoms = useMemo(() => countBy(events.flatMap((e) => e.symptoms)), [events]);
+  const bodyAreas = useMemo(() => countBy(events.flatMap((e) => e.bodyAreas)), [events]);
 
-  const bodyAreas = useMemo(
-    () => countBy(events.flatMap(e => e.bodyAreas)),
-    [events]
-  );
-
-  const recent = [...events]
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .slice(0, 5);
+  const recent = [...events].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
 
   return (
     <div className="max-w-7xl mx-auto p-10 space-y-10">
       {/* Header */}
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
             Community Health Dashboard
@@ -64,7 +50,17 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <OfflineBadge />
+        <div className="flex items-center gap-3">
+          <OfflineBadge />
+
+          {/* Go to Chat button */}
+          <Link
+            href="/chat" // <-- change if your chat route is different
+            className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50"
+          >
+            Go to Chat
+          </Link>
+        </div>
       </header>
 
       {/* KPIs */}
@@ -96,13 +92,27 @@ export default function DashboardPage() {
         <InsightCard title="Affected Body Areas" data={bodyAreas} />
       </section>
 
-      
+      {/* (Optional) Recent list placeholder since you computed it */}
+      {/* <section className="rounded-2xl border p-6">
+        <h2 className="font-medium mb-4">Recent cases</h2>
+        {recent.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No recent cases</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {recent.map((e) => (
+              <li key={e.timestamp} className="flex justify-between">
+                <span>{formatRelativeTime(e.timestamp)}</span>
+                <span className="capitalize">{e.outcome}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section> */}
     </div>
   );
 }
 
 /* ---------------- helpers ---------------- */
-
 function countBy(values: string[]) {
   return values.reduce<Record<string, number>>((acc, v) => {
     acc[v] = (acc[v] || 0) + 1;
@@ -120,13 +130,11 @@ function formatRelativeTime(ts: number) {
 }
 
 /* ---------------- UI ---------------- */
-
 function OfflineBadge() {
   const [online, setOnline] = useState<boolean | null>(null);
 
   useEffect(() => {
     setOnline(navigator.onLine);
-
     const on = () => setOnline(true);
     const off = () => setOnline(false);
 
@@ -144,9 +152,7 @@ function OfflineBadge() {
   return (
     <span
       className={`text-xs px-3 py-1 rounded-full ${
-        online
-          ? "bg-emerald-50 text-emerald-700"
-          : "bg-amber-50 text-amber-700"
+        online ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
       }`}
     >
       {online ? "Online · Sync ready" : "Offline · Data saved locally"}
@@ -182,14 +188,8 @@ function Kpi({
   return (
     <div className={`rounded-2xl border p-6 ${bg}`}>
       <div className="text-sm text-muted-foreground">{title}</div>
-      <div className={`text-4xl font-semibold mt-2 ${color}`}>
-        {value}
-      </div>
-      {hint && (
-        <p className="text-xs text-muted-foreground mt-4">
-          {hint}
-        </p>
-      )}
+      <div className={`text-4xl font-semibold mt-2 ${color}`}>{value}</div>
+      {hint && <p className="text-xs text-muted-foreground mt-4">{hint}</p>}
     </div>
   );
 }
