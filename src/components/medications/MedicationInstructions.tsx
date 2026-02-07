@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 export const medicationInstructionsSchema = z.object({
+  id: z.string().optional(),
   patientName: z.string().optional(),
   medicationName: z.string().default("Medication"),
   strength: z.string().optional(),
@@ -44,7 +45,7 @@ function PillDots({ count }: { count: number }) {
   );
 }
 
-export function MedicationInstructions(props: MedicationInstructionsProps) {
+export function MedicationInstructions({ id, ...props }: MedicationInstructionsProps & { id?: string }) {
   const dose = props.dose ?? { amount: 1, unit: "tablet" as const };
   const schedule = props.schedule ?? {
     morning: false,

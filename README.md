@@ -1,6 +1,6 @@
 # 🏥 Healthcare Triage Assistant for Underserved Communities
 
-An **AI-powered, offline-capable healthcare triage system** designed for underserved and rural communities.
+An **Tambo AI-powered, offline-capable healthcare triage system** designed for underserved and rural communities.
 
 ---
 
