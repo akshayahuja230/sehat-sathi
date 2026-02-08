@@ -13,6 +13,9 @@ import type { BodyArea } from "@/services/triage/triageEngine";
 import { buildTriageSummary } from "@/services/triage/triageEngine";
 import type { TriageLevel } from "@/services/triage/decisionTree";
 
+import { saveOutcome } from "@/lib/community-store";
+
+
 function badgeClasses(level: TriageLevel) {
   switch (level) {
     case "emergency":
@@ -95,7 +98,23 @@ export function TriagePanel({
 
         <div className="space-y-4">
           {!level ? (
-            <DecisionTree language={language} onComplete={(lvl) => setLevel(lvl)} />
+            <DecisionTree
+              language={language}
+              onComplete={(lvl) => {
+                setLevel(lvl);
+
+                saveOutcome({
+                  outcome: lvl,
+                  symptoms: symptomText
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                  bodyAreas: bodyArea === "none" ? [] : [bodyArea],
+                  timestamp: Date.now(),
+                });
+              }}
+            />
+
           ) : (
             <div className="border rounded p-4">
               <div className="flex items-center justify-between gap-3">
